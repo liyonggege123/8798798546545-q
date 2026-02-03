@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工单管理系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>工单管理系统</h1>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary" onclick="openWorkOrderManagement()">工单管理</button>
+                    <button class="btn btn-primary" onclick="openNonconformingManagement()">不合格品管理</button>
+                </div>
+            </div>
+            <div class="search-container">
+                <div class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="batchNumberSearch">批次号搜索</label>
+                            <input type="text" id="batchNumberSearch" name="batchNumberSearch" placeholder="输入批次号">
+                        </div>
+                        <div class="form-group">
+                            <label for="drawingNumberSearch">图号搜索</label>
+                            <input type="text" id="drawingNumberSearch" name="drawingNumberSearch" placeholder="输入图号">
+                        </div>
+                        <div class="form-group search-buttons">
+                            <button type="button" class="btn btn-primary" onclick="searchWorkOrders()">搜索</button>
+                            <button type="button" class="btn btn-secondary" onclick="clearSearch()">清空</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 统计卡片 -->
+        <section class="stats-section">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <h3>合格率</h3>
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=quality%20icon%20green%20check%20mark&image_size=square" alt="合格率" class="stat-icon">
+                    </div>
+                    <div class="stat-card-body">
+                        <div class="stat-value" id="qualifiedRate">0%</div>
+                        <div class="stat-description">质检合格比例</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <h3>交期准时率</h3>
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=time%20icon%20blue%20clock&image_size=square" alt="交期准时率" class="stat-icon">
+                    </div>
+                    <div class="stat-card-body">
+                        <div class="stat-value" id="onTimeRate">0%</div>
+                        <div class="stat-description">准时完成比例</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <h3>工单完成率</h3>
+                        <div class="stat-icon">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=completion%20icon%20purple%20progress%20check&image_size=square" alt="工单完成率" class="stat-icon">
+                        </div>
+                    </div>
+                    <div class="stat-card-body">
+                        <div class="stat-value" id="completionRate">0%</div>
+                        <div class="stat-description">工单完成比例</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <h3>待完成工单</h3>
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=pending%20tasks%20icon%20orange%20clock&image_size=square" alt="待完成工单" class="stat-icon">
+                    </div>
+                    <div class="stat-card-body">
+                        <div class="stat-value" id="pendingOrders">0</div>
+                        <div class="stat-description">未全部完成的工单</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <main class="main">
+            <section class="section">
+                <h2>创建工单</h2>
+                <form id="workOrderForm" class="form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="drawingNumber">图号</label>
+                            <input type="text" id="drawingNumber" name="drawingNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="orderQuantity">订单数量</label>
+                            <input type="number" id="orderQuantity" name="orderQuantity" min="1" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="deliveryDate">交期</label>
+                            <input type="date" id="deliveryDate" name="deliveryDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="orderType">订单类型</label>
+                            <select id="orderType" name="orderType" required>
+                                <option value="生产">生产</option>
+                                <option value="JIT">JIT</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="materialName">物料名称</label>
+                        <input type="text" id="materialName" name="materialName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>工艺路线 (可多选)</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="processRoute" value="虎钳"> 虎钳</label>
+                            <label><input type="checkbox" name="processRoute" value="双面胶"> 双面胶</label>
+                            <label><input type="checkbox" name="processRoute" value="精密虎钳"> 精密虎钳</label>
+                            <label><input type="checkbox" name="processRoute" value="直角板"> 直角板</label>
+                            <label><input type="checkbox" name="processRoute" value="磨床"> 磨床</label>
+                            <label><input type="checkbox" name="processRoute" value="铣床"> 铣床</label>
+                            <label><input type="checkbox" name="processRoute" value="专用工装"> 专用工装</label>
+                            <label><input type="checkbox" name="processRoute" value="钳工"> 钳工</label>
+                            <label><input type="checkbox" name="processRoute" value="二次加工"> 二次加工</label>
+                            <label><input type="checkbox" name="processRoute" value="整形调直"> 整形调直</label>
+                            <label><input type="checkbox" name="processRoute" value="四轴"> 四轴</label>
+                            <label><input type="checkbox" name="processRoute" value="压板+螺丝"> 压板+螺丝</label>
+                            <label><input type="checkbox" name="processRoute" value="吸盘"> 吸盘</label>
+                            <label><input type="checkbox" name="processRoute" value="大机"> 大机</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reviewPoints">工艺评审重点关注点</label>
+                        <textarea id="reviewPoints" name="reviewPoints" rows="3"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerCode">客户代码</label>
+                            <input type="text" id="customerCode" name="customerCode">
+                        </div>
+                        <div class="form-group">
+                            <label for="orderNumber">订单号</label>
+                            <input type="text" id="orderNumber" name="orderNumber">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="batchNumber">批次号</label>
+                            <input type="text" id="batchNumber" name="batchNumber">
+                        </div>
+                        <div class="form-group">
+                            <label for="processLeader">工艺负责人</label>
+                            <select id="processLeader" name="processLeader">
+                                <option value="陈亮">陈亮</option>
+                                <option value="石柳">石柳</option>
+                                <option value="何银川">何银川</option>
+                                <option value="赵梦园">赵梦园</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="attachment">附件图片</label>
+                        <input type="file" id="attachment" name="attachment" accept="image/*" multiple>
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">创建工单</button>
+                </form>
+            </section>
+            
+            <section class="section">
+                <h2>工序管理</h2>
+                <div id="workOrderList" class="work-order-list">
+                    <p class="empty-message">暂无工单，请先创建工单</p>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="footer">
+            <p>© 2024 工单管理系统</p>
+        </footer>
+    </div>
+    
+    <!-- 报工记录弹出卡片 -->
+    <div id="reportCardOverlay" class="report-card-overlay">
+        <div class="report-card">
+            <div class="report-card-header">
+                <h3 id="reportCardTitle">报工记录详情</h3>
+                <button class="close-btn" onclick="closeReportCard()">×</button>
+            </div>
+            <div class="report-card-body" id="reportCardBody">
+                <!-- 报工记录内容将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="push-notifications.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // 初始化推送功能
+        if (typeof initPushNotifications === 'function') {
+            initPushNotifications();
+        }
+    </script>
+</body>
+</html>

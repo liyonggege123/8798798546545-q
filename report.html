@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工序报工 - 工单管理系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>工序报工</h1>
+                <button class="btn btn-secondary" onclick="goBack()">返回主页</button>
+            </div>
+        </header>
+        
+        <main class="main">
+            <section class="section">
+                <h2>工单信息</h2>
+                <div id="orderInfo" class="order-info">
+                    <p class="loading-message">加载中...</p>
+                </div>
+            </section>
+            
+            <section class="section">
+                <h2 id="processTitle">工序报工</h2>
+                <div id="reportFormContainer">
+                    <p class="loading-message">加载中...</p>
+                </div>
+            </section>
+            
+            <!-- 评审报工子页面 -->
+            <div id="reviewReportSubpage" class="review-report-subpage hidden">
+                <div class="section">
+                    <h2>评审报工详情</h2>
+                    <form id="reviewReportForm" class="form">
+                        <div class="form-group">
+                            <label for="customer">关联客户</label>
+                            <input type="text" id="customer" name="customer" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerRequirements">客户特别要求</label>
+                            <textarea id="customerRequirements" name="customerRequirements" rows="3" placeholder="如无则按大钣常规客户要求执行"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="reviewHost">评审主持</label>
+                                <select id="reviewHost" name="reviewHost" required>
+                                    <option value="陈亮">陈亮</option>
+                                    <option value="石柳">石柳</option>
+                                    <option value="何银川">何银川</option>
+                                    <option value="赵梦园">赵梦园</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="reviewLocation">评审地点</label>
+                                <select id="reviewLocation" name="reviewLocation" required>
+                                    <option value="车间会议室">车间会议室</option>
+                                    <option value="二楼会议室">二楼会议室</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="attendanceAttachment">参会人员签到附件</label>
+                            <input type="file" id="attendanceAttachment" name="attendanceAttachment" accept="image/*" multiple>
+                            <div id="attendancePreview" class="image-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>加工工艺指定 (可多选)</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="processingTechnology" value="传统工艺虎钳压板"> 传统工艺虎钳压板</label>
+                                <label><input type="checkbox" name="processingTechnology" value="吸盘工艺正反面"> 吸盘工艺正反面</label>
+                                <label><input type="checkbox" name="processingTechnology" value="大机"> 大机</label>
+                                <label><input type="checkbox" name="processingTechnology" value="小四轴"> 小四轴</label>
+                                <label><input type="checkbox" name="processingTechnology" value="大四轴"> 大四轴</label>
+                                <label><input type="checkbox" name="processingTechnology" value="小五轴"> 小五轴</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reviewConclusion">评审结论</label>
+                            <textarea id="reviewConclusion" name="reviewConclusion" rows="4" placeholder="评审内容，程式与生产过程预估符合工艺要求、打样试产"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="reviewPhotos">评审现场照片或证明资料</label>
+                            <input type="file" id="reviewPhotos" name="reviewPhotos" accept="image/*" multiple>
+                            <div id="photosPreview" class="image-preview"></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeReviewReportSubpage()">取消</button>
+                            <button type="submit" class="btn btn-primary">提交评审报工</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 生产准备报工子页面 -->
+            <div id="preparationReportSubpage" class="review-report-subpage hidden">
+                <div class="section">
+                    <h2>生产准备报工</h2>
+                    <div class="preparation-options">
+                        <button type="button" class="btn btn-primary preparation-option-btn" onclick="openMaterialReportSubpage()">领料点数</button>
+                        <button type="button" class="btn btn-primary preparation-option-btn" onclick="openProcessCardReportSubpage()">生产工艺流程卡发放</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 领料点数子页面 -->
+            <div id="materialReportSubpage" class="review-report-subpage hidden">
+                <div class="section">
+                    <h2>领料点数</h2>
+                    <form id="materialReportForm" class="form">
+                        <div class="form-group">
+                            <label for="quantity">领取数量</label>
+                            <input type="number" id="quantity" name="quantity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>检验结果</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="inspectionResult" value="合格" required> 合格</label>
+                                <label><input type="radio" name="inspectionResult" value="不合格" required> 不合格</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="materialTaker">领料人</label>
+                            <input type="text" id="materialTaker" name="materialTaker" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="materialTime">领料时间</label>
+                            <input type="datetime-local" id="materialTime" name="materialTime" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeMaterialReportSubpage()">取消</button>
+                            <button type="submit" class="btn btn-primary">提交领料点数</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 生产工艺流程卡发放子页面 -->
+            <div id="processCardReportSubpage" class="review-report-subpage hidden">
+                <div class="section">
+                    <h2>生产工艺流程卡发放</h2>
+                    <form id="processCardReportForm" class="form">
+                        <div class="form-group">
+                            <label for="issuer">发放人</label>
+                            <input type="text" id="issuer" name="issuer" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="processDate">处理日期</label>
+                            <input type="datetime-local" id="processDate" name="processDate" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeProcessCardReportSubpage()">取消</button>
+                            <button type="submit" class="btn btn-primary">提交工艺流程卡发放</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 生产报工子页面 -->
+            <div id="productionReportSubpage" class="review-report-subpage hidden">
+                <div class="section">
+                    <h2>生产报工</h2>
+                    <div class="production-options">
+                        <h3>工序列表</h3>
+                        <div id="processList" class="process-list-container">
+                            <!-- 工序按钮将通过JS动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 生产工序报工子页面 -->
+            <div id="productionProcessReportSubpage" class="review-report-subpage hidden">
+                <div class="section">
+                    <h2 id="processNameHeader">工序报工</h2>
+                    <form id="productionProcessReportForm" class="form">
+                        <div class="form-group">
+                            <label for="processName">工序名称</label>
+                            <input type="text" id="processName" name="processName" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productionQuantity">数量</label>
+                            <input type="number" id="productionQuantity" name="productionQuantity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reporter">报工人</label>
+                            <input type="text" id="reporter" name="reporter" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="unitTime">单件工时</label>
+                            <input type="number" id="unitTime" name="unitTime" min="0.1" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="submitDate">提交日期</label>
+                            <input type="datetime-local" id="submitDate" name="submitDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>自检结论</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="selfInspectionResult" value="合格" required> 合格</label>
+                                <label><input type="radio" name="selfInspectionResult" value="需要返修" required> 需要返修</label>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeProductionProcessReportSubpage()">取消</button>
+                            <button type="submit" class="btn btn-primary">提交报工</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 质检报工子页面 -->
+            <div id="inspectionReportSubpage" class="review-report-subpage hidden">
+                <div class="section">
+                    <h2>质检报工</h2>
+                    <div class="inspection-options">
+                        <h3>质检类型</h3>
+                        <div class="inspection-type-buttons">
+                            <button type="button" class="btn btn-primary inspection-type-btn" onclick="openIncomingInspectionSubpage()">来料检</button>
+                            <button type="button" class="btn btn-primary inspection-type-btn" onclick="openFirstInspectionSubpage()">首巡检</button>
+                            <button type="button" class="btn btn-primary inspection-type-btn" onclick="openOutgoingInspectionSubpage()">出货检</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 来料检子页面 -->
+            <div id="incomingInspectionSubpage" class="review-report-subpage hidden">
+                <div class="section">
+                    <h2>来料检</h2>
+                    <form id="incomingInspectionForm" class="form">
+                        <div class="form-group">
+                            <label for="supplierName">供应商名称</label>
+                            <input type="text" id="supplierName" name="supplierName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="poNumber">PO</label>
+                            <input type="text" id="poNumber" name="poNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="material">材质</label>
+                            <input type="text" id="material" name="material" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="purchaseOrderAttachment">采购单要求上传附件图片</label>
+                            <input type="file" id="purchaseOrderAttachment" name="purchaseOrderAttachment" accept="image/*" multiple>
+                            <div id="purchaseOrderPreview" class="image-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="actualResult">实测结果</label>
+                            <textarea id="actualResult" name="actualResult" rows="3" required></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="incomingQuantity">来料数量</label>
+                                <input type="number" id="incomingQuantity" name="incomingQuantity" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="sampleQuantity">抽检样本数量</label>
+                                <input type="number" id="sampleQuantity" name="sampleQuantity" min="1" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>检验结论</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="inspectionConclusion" value="合格" required> 合格</label>
+                                <label><input type="radio" name="inspectionConclusion" value="不合格" required> 不合格</label>
+                            </div>
+                        </div>
+                        <div id="unqualifiedDescriptionSection" class="form-group hidden">
+                            <label for="unqualifiedDescription">不合格描述</label>
+                            <textarea id="unqualifiedDescription" name="unqualifiedDescription" rows="3"></textarea>
+                        </div>
+                        <div id="unqualifiedAttachmentSection" class="form-group hidden">
+                            <label for="unqualifiedAttachment">不合格证明附件</label>
+                            <input type="file" id="unqualifiedAttachment" name="unqualifiedAttachment" accept="image/*" multiple>
+                            <div id="unqualifiedPreview" class="image-preview"></div>
+                        </div>
+                        <div id="inspectionMarkSection" class="form-group hidden">
+                            <label for="inspectionMarkAttachment">检验标识附件</label>
+                            <input type="file" id="inspectionMarkAttachment" name="inspectionMarkAttachment" accept="image/*" multiple>
+                            <div id="inspectionMarkPreview" class="image-preview"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="inspectionPerson">检验人员</label>
+                                <input type="text" id="inspectionPerson" name="inspectionPerson" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="inspectionDate">检验日期</label>
+                                <input type="datetime-local" id="inspectionDate" name="inspectionDate" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeIncomingInspectionSubpage()">取消</button>
+                            <button type="submit" class="btn btn-primary">提交来料检</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 首巡检子页面 -->
+            <div id="firstInspectionSubpage" class="review-report-subpage hidden">
+                <div class="section">
+                    <h2>首巡检</h2>
+                    <form id="firstInspectionForm" class="form">
+                        <div class="form-group">
+                            <label for="inspectedProcess">送检工序</label>
+                            <select id="inspectedProcess" name="inspectedProcess" required>
+                                <option value="CNC1">CNC1</option>
+                                <option value="CNC2">CNC2</option>
+                                <option value="CNC3">CNC3</option>
+                                <option value="CNC4">CNC4</option>
+                                <option value="CNC5">CNC5</option>
+                                <option value="CNC6">CNC6</option>
+                                <option value="CNC7">CNC7</option>
+                                <option value="CNC8">CNC8</option>
+                                <option value="CNC9">CNC9</option>
+                                <option value="MR">MR</option>
+                                <option value="磨床">磨床</option>
+                                <option value="整形">整形</option>
+                                <option value="GC1">GC1</option>
+                                <option value="GC2">GC2</option>
+                                <option value="走心机">走心机</option>
+                                <option value="FT">FT</option>
+                                <option value="清洁">清洁</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="submitter">送检人</label>
+                                <input type="text" id="submitter" name="submitter" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="machineNumber">送检机台号</label>
+                                <input type="text" id="machineNumber" name="machineNumber" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>是否涉及生物城项目</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="isBiologicalCity" value="是" required> 是</label>
+                                <label><input type="radio" name="isBiologicalCity" value="否" required> 否</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>自检报工结论</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="selfInspectionConclusion" value="合格" required> 合格</label>
+                                <label><input type="radio" name="selfInspectionConclusion" value="不合格" required> 不合格</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>检验员复核结论</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="reviewConclusion" value="合格" required> 合格</label>
+                                <label><input type="radio" name="reviewConclusion" value="不合格" required> 不合格</label>
+                            </div>
+                        </div>
+                        <div id="inspectionReportSection" class="form-group hidden">
+                            <label for="inspectionReportAttachment">检验报告原档附件</label>
+                            <input type="file" id="inspectionReportAttachment" name="inspectionReportAttachment" accept="image/*" multiple>
+                            <div id="inspectionReportPreview" class="image-preview"></div>
+                        </div>
+                        <div id="firstUnqualifiedSection" class="form-group hidden">
+                            <label for="firstUnqualifiedDescription">不合格描述</label>
+                            <textarea id="firstUnqualifiedDescription" name="firstUnqualifiedDescription" rows="3"></textarea>
+                        </div>
+                        <div id="firstUnqualifiedAttachmentSection" class="form-group hidden">
+                            <label for="firstUnqualifiedAttachment">不合格现象附件上传</label>
+                            <input type="file" id="firstUnqualifiedAttachment" name="firstUnqualifiedAttachment" accept="image/*" multiple>
+                            <div id="firstUnqualifiedPreview" class="image-preview"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstInspectionPerson">检验人员</label>
+                                <input type="text" id="firstInspectionPerson" name="firstInspectionPerson" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="firstInspectionDate">检验日期</label>
+                                <input type="datetime-local" id="firstInspectionDate" name="firstInspectionDate" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeFirstInspectionSubpage()">取消</button>
+                            <button type="submit" class="btn btn-primary">提交首巡检</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 出货检子页面 -->
+            <div id="outgoingInspectionSubpage" class="review-report-subpage hidden">
+                <div class="section">
+                    <h2>出货检</h2>
+                    <form id="outgoingInspectionForm" class="form">
+                        <div class="form-group">
+                            <label>是否属于生物城项目</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="outgoingIsBiologicalCity" value="是" required> 是</label>
+                                <label><input type="radio" name="outgoingIsBiologicalCity" value="否" required> 否</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>物料状态</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="materialStatus" value="成品" required> 成品</label>
+                                <label><input type="radio" name="materialStatus" value="半成品" required> 半成品</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="batchInspectionQuantity">批次交检数量</label>
+                            <input type="number" id="batchInspectionQuantity" name="batchInspectionQuantity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>涉及委外表面处理检验</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="outsourcingInspection" value="委外工序合格" required> 委外工序合格</label>
+                                <label><input type="radio" name="outsourcingInspection" value="不涉及" required> 不涉及</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>外观/工序错漏检验</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="appearanceInspection" value="合格" required> 合格</label>
+                                <label><input type="radio" name="appearanceInspection" value="不合格" required> 不合格</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>抽样全尺寸样品检验</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="fullSizeInspection" value="合格" required> 合格</label>
+                                <label><input type="radio" name="fullSizeInspection" value="不合格" required> 不合格</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>其他行业规范或通用规范要求</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="industryStandardInspection" value="合格" required> 合格</label>
+                                <label><input type="radio" name="industryStandardInspection" value="不合格" required> 不合格</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>最终检验结论</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="finalInspectionConclusion" value="合格" required> 合格</label>
+                                <label><input type="radio" name="finalInspectionConclusion" value="不合格" required> 不合格</label>
+                            </div>
+                        </div>
+                        <div id="finalReportSection" class="form-group hidden">
+                            <label for="finalReportAttachment">成品检验报告上传附件</label>
+                            <input type="file" id="finalReportAttachment" name="finalReportAttachment" accept="image/*" multiple>
+                            <div id="finalReportPreview" class="image-preview"></div>
+                        </div>
+                        <div id="finalUnqualifiedSection" class="form-group hidden">
+                            <label for="finalUnqualifiedDescription">不合格描述</label>
+                            <textarea id="finalUnqualifiedDescription" name="finalUnqualifiedDescription" rows="3"></textarea>
+                        </div>
+                        <div id="finalUnqualifiedAttachmentSection" class="form-group hidden">
+                            <label for="finalUnqualifiedAttachment">异常现象附件上传</label>
+                            <input type="file" id="finalUnqualifiedAttachment" name="finalUnqualifiedAttachment" accept="image/*" multiple>
+                            <div id="finalUnqualifiedPreview" class="image-preview"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="outgoingInspectionPerson">检验员</label>
+                                <input type="text" id="outgoingInspectionPerson" name="outgoingInspectionPerson" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="outgoingInspectionDate">检验日期</label>
+                                <input type="datetime-local" id="outgoingInspectionDate" name="outgoingInspectionDate" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeOutgoingInspectionSubpage()">取消</button>
+                            <button type="submit" class="btn btn-primary">提交出货检</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 包装报工子页面 -->
+            <div id="packagingReportSubpage" class="review-report-subpage hidden">
+                <div class="section">
+                    <h2>包装报工</h2>
+                    <form id="packagingReportForm" class="form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="warehouseHandler">入库处理人</label>
+                                <input type="text" id="warehouseHandler" name="warehouseHandler" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="warehouseDate">入库日期</label>
+                                <input type="datetime-local" id="warehouseDate" name="warehouseDate" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closePackagingReportSubpage()">取消</button>
+                            <button type="submit" class="btn btn-primary">提交报工</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>© 2024 工单管理系统</p>
+        </footer>
+    </div>
+    
+    <script src="push-notifications.js"></script>
+    <script src="report.js"></script>
+    <script>
+        // 初始化推送功能
+        if (typeof initPushNotifications === 'function') {
+            initPushNotifications();
+        }
+    </script>
+</body>
+</html>

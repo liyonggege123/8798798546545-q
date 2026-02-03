@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工单详情 - 工单管理系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>工单详情</h1>
+                <button class="btn btn-secondary" onclick="goBack()">返回主页</button>
+            </div>
+        </header>
+        
+        <main class="main">
+            <section class="section">
+                <h2>工单信息</h2>
+                <div id="orderInfo" class="order-info">
+                    <p class="loading-message">加载中...</p>
+                </div>
+            </section>
+            
+            <section class="section">
+                <h2>工序完成情况</h2>
+                <div id="processStatus" class="process-status-list">
+                    <p class="loading-message">加载中...</p>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="footer">
+            <p>© 2024 工单管理系统</p>
+        </footer>
+    </div>
+    
+    <script src="push-notifications.js"></script>
+    <script src="workorder-details.js"></script>
+    <script>
+        // 初始化推送功能
+        if (typeof initPushNotifications === 'function') {
+            initPushNotifications();
+        }
+    </script>
+    
+    <!-- 报工记录弹出卡片 -->
+    <div class="report-card-overlay" id="reportCardOverlay" style="display: none;">
+        <div class="report-card">
+            <div class="report-card-header">
+                <h3 id="reportCardTitle">报工记录详情</h3>
+                <button class="btn btn-close" onclick="closeReportCard()">×</button>
+            </div>
+            <div class="report-card-body" id="reportCardBody">
+                <!-- 报工记录内容将动态填充 -->
+            </div>
+            <div class="report-card-footer">
+                <button class="btn btn-primary" onclick="closeReportCard()">关闭</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

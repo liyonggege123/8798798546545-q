@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>不合格品管理</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>不合格品管理</h1>
+                <button class="btn btn-primary" onclick="goBack()">返回主页</button>
+            </div>
+        </header>
+        
+        <main class="main">
+            <section class="section">
+                <h2>不合格品清单</h2>
+                <div id="nonconformingList" class="nonconforming-list">
+                    <p class="empty-message">暂无不合格品记录</p>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="footer">
+            <p>© 2024 工单管理系统</p>
+        </footer>
+    </div>
+    
+    <!-- 不合格品明细弹出卡片 -->
+    <div id="nonconformingCardOverlay" class="report-card-overlay">
+        <div class="report-card">
+            <div class="report-card-header">
+                <h3 id="nonconformingCardTitle">不合格品明细</h3>
+                <button class="close-btn" onclick="closeNonconformingCard()">×</button>
+            </div>
+            <div class="report-card-body" id="nonconformingCardBody">
+                <!-- 不合格品明细内容将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 不合格品处置弹出卡片 -->
+    <div id="disposalCardOverlay" class="report-card-overlay">
+        <div class="report-card">
+            <div class="report-card-header">
+                <h3 id="disposalCardTitle">不合格品处置</h3>
+                <button class="close-btn" onclick="closeDisposalCard()">×</button>
+            </div>
+            <div class="report-card-body">
+                <form id="disposalForm" class="form">
+                    <input type="hidden" id="nonconformingId" value="">
+                    <div class="form-group">
+                        <label for="causeAnalysis">原因分析</label>
+                        <textarea id="causeAnalysis" name="causeAnalysis" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="correctiveAction">纠正措施</label>
+                        <textarea id="correctiveAction" name="correctiveAction" rows="3" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="qualityDisposal">品质处置判定</label>
+                            <select id="qualityDisposal" name="qualityDisposal" required>
+                                <option value="返工">返工</option>
+                                <option value="返修">返修</option>
+                                <option value="降级使用">降级使用</option>
+                                <option value="报废">报废</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="engineeringDisposal">工程处置判定</label>
+                            <select id="engineeringDisposal" name="engineeringDisposal" required>
+                                <option value="修改工艺">修改工艺</option>
+                                <option value="修改图纸">修改图纸</option>
+                                <option value="维持现状">维持现状</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="finalDisposal">最终判定</label>
+                        <select id="finalDisposal" name="finalDisposal" required>
+                            <option value="合格">合格</option>
+                            <option value="不合格">不合格</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>是否涉及预防措施</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="preventiveAction" value="是" required onclick="togglePreventiveActionSection()"> 是</label>
+                            <label><input type="radio" name="preventiveAction" value="否" required onclick="togglePreventiveActionSection()"> 否</label>
+                        </div>
+                    </div>
+                    <div id="preventiveActionSection" class="form-group hidden">
+                        <label for="preventiveActionDetails">预防措施详情</label>
+                        <textarea id="preventiveActionDetails" name="preventiveActionDetails" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>异常关闭</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="abnormalClosed" value="是" required> 是</label>
+                            <label><input type="radio" name="abnormalClosed" value="否" required> 否</label>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeDisposalCard()">取消</button>
+                        <button type="submit" class="btn btn-primary">提交处置</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="push-notifications.js"></script>
+    <script src="nonconforming.js"></script>
+    <script>
+        // 初始化推送功能
+        if (typeof initPushNotifications === 'function') {
+            initPushNotifications();
+        }
+    </script>
+</body>
+</html>
